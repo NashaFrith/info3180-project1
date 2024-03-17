@@ -6,11 +6,12 @@ This file contains the routes for your application.
 """
 
 import os
-from app import app, db, login_manager
+from app import app, db
 from flask import render_template, request, redirect, url_for, flash, session, abort
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.utils import secure_filename
 from app.forms import PropertyForm
+from app.models import Property
 from werkzeug.security import check_password_hash
 from flask import send_from_directory
 from app.utils import get_uploaded_images
@@ -48,6 +49,9 @@ def properties_create():
         price = form.price.data
         type = form.type.data
         photo = form.photo.data
+    
+        
+        #connect db, then id = ...
         filename = secure_filename(photo.filename)
         photo.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
 
