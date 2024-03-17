@@ -5,8 +5,15 @@ Werkzeug Documentation:  https://werkzeug.palletsprojects.com/
 This file contains the routes for your application.
 """
 
-from app import app
-from flask import render_template, request, redirect, url_for
+import os
+from app import app, db, login_manager
+from flask import render_template, request, redirect, url_for, flash, session, abort
+from flask_login import login_user, logout_user, current_user, login_required
+from werkzeug.utils import secure_filename
+from app.forms import PropertyForm
+from werkzeug.security import check_password_hash
+from flask import send_from_directory
+from app.utils import get_uploaded_images
 
 
 ###
@@ -24,13 +31,29 @@ def about():
     """Render the website's about page."""
     return render_template('about.html', name="Mary Jane")
 
+
+
 @app.route('/properties')
 def properties():
     return render_template("properties.html")
 
-@app.route('/properties/create')
+@app.route('/properties/create', methods=['POST', 'GET'])
 def properties_create():
-    return render_template("properties_create.html")
+    form = PropertyForm()
+
+    if form.validate_on_submit():
+        title = form.title.data
+        bedrooms = form.bedrooms.data
+        location = form.location.data
+        price = form.price.data
+        type = form.type.data
+        photo = form.photo.data
+        filename = secure_filename(photo.filename)
+        photo.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
+
+        flash('Property Successfully Added', 'success')
+        return redirect(url_for('properties')) 
+    return render_template("properties_create.html", form = form)
 
 @app.route('/properties/<propertyid>')
 def properties_id():
